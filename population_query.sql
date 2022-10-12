@@ -1,6 +1,5 @@
+
 -- the following query is based on census data 2011 which is in the form of two tables that are available in the 'data' folder
-
-
 
 
 
