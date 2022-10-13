@@ -96,3 +96,29 @@ SELECT TOP 3 * FROM top_states ORDER BY top_states.literacy_rate DESC;
 -- 9. states starting with alphabet 'A'
 SELECT DISTINCT state FROM project..data1
 WHERE state LIKE 'A%';
+
+
+
+-- 10. Find number of males and females (using sex_ratio and total_population)
+
+SELECT c.District, c.State, ROUND(c.Sex_ratio*c.Population/(1000 + c.Sex_ratio),0) females, ROUND(1000*c.Population/(1000 + c.Sex_ratio),0) males FROM
+	(SELECT a.District, a.State, a.Sex_ratio, b.Population FROM project..data1 a INNER JOIN project..data2 b ON a.District = b.District) c;
+
+
+-- state-wise males and females
+
+SELECT d.State, SUM(d.females) num_females, SUM(d.males) num_males FROM
+	(SELECT c.District, c.State, ROUND(c.Sex_ratio*c.Population/(1000 + c.Sex_ratio),0) females, ROUND(1000*c.Population/(1000 + c.Sex_ratio),0) males FROM
+		(SELECT a.District, a.State, a.Sex_ratio, b.Population FROM project..data1 a INNER JOIN project..data2 b ON a.District = b.District) c) d
+		GROUP BY d.State;
+
+
+
+-- 11. Find state-wise literacy rate
+SELECT e.State, ROUND(e.literates*100/e.total_population,2) literacy_rate FROM
+	(SELECT d.State, SUM(d.Population) total_population, SUM(d.Literates) literates FROM
+		(SELECT c.District, c.State, c.Population, ROUND(c.Literacy*c.Population/100, 0) Literates FROM
+			(SELECT a.District, a.State, a.Literacy, b.Population 
+				FROM project..data1 a INNER JOIN project..data2 b
+				ON a.District = b.District) c) d
+				GROUP BY d.State) e;
