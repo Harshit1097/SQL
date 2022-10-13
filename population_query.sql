@@ -1,5 +1,6 @@
-
 -- the following query is based on census data 2011 which is in the form of two tables that are available in the 'data' folder
+
+
 
 
 
@@ -54,7 +55,7 @@ ORDER BY avg_sex_ratio DESC;
 -- 6. states which have average literacy rate above 85%
 SELECT state, ROUND(AVG(literacy),2) literacy_rate
 FROM project..data1
-GROUP BY state HAVING CAST(AVG(literacy) as INT) > 85
+GROUP BY state HAVING ROUND(AVG(literacy),2) > 85
 ORDER BY literacy_rate DESC;
 
 
@@ -101,15 +102,15 @@ WHERE state LIKE 'A%';
 
 -- 10. Find number of males and females (using sex_ratio and total_population)
 
-SELECT c.District, c.State, ROUND(c.Sex_ratio*c.Population/(1000 + c.Sex_ratio),0) females, ROUND(1000*c.Population/(1000 + c.Sex_ratio),0) males FROM
-	(SELECT a.District, a.State, a.Sex_ratio, b.Population FROM project..data1 a INNER JOIN project..data2 b ON a.District = b.District) c;
+SELECT a.District, a.State, ROUND(a.Sex_ratio*b.Population/(1000 + a.Sex_ratio),0) females, ROUND(1000*b.Population/(1000 + a.Sex_ratio),0) males FROM
+	(project..data1 as a INNER JOIN project..data2 as b ON a.District = b.District);
 
 
 -- state-wise males and females
 
 SELECT d.State, SUM(d.females) num_females, SUM(d.males) num_males FROM
 	(SELECT c.District, c.State, ROUND(c.Sex_ratio*c.Population/(1000 + c.Sex_ratio),0) females, ROUND(1000*c.Population/(1000 + c.Sex_ratio),0) males FROM
-		(SELECT a.District, a.State, a.Sex_ratio, b.Population FROM project..data1 a INNER JOIN project..data2 b ON a.District = b.District) c) d
+		(SELECT a.District, a.State, a.Sex_ratio, b.Population FROM project..data1 as a INNER JOIN project..data2 as b ON a.District = b.District) as c) as d
 		GROUP BY d.State;
 
 
@@ -119,6 +120,14 @@ SELECT e.State, ROUND(e.literates*100/e.total_population,2) literacy_rate FROM
 	(SELECT d.State, SUM(d.Population) total_population, SUM(d.Literates) literates FROM
 		(SELECT c.District, c.State, c.Population, ROUND(c.Literacy*c.Population/100, 0) Literates FROM
 			(SELECT a.District, a.State, a.Literacy, b.Population 
-				FROM project..data1 a INNER JOIN project..data2 b
-				ON a.District = b.District) c) d
-				GROUP BY d.State) e;
+				FROM project..data1 as a INNER JOIN project..data2 as b
+				ON a.District = b.District) as c) as d
+				GROUP BY d.State) as e;
+
+
+
+-- 12. Find population in previous census (using growth and population)
+SELECT c.District, c.State, c.Population, ROUND(c.Population/(1+c.Growth),0) previous_population FROM
+	(SELECT a.District, a.State, a.Growth, b.Population 
+	FROM project..data1 as a INNER JOIN project..data2 as b
+	ON a.District = b.District) as c;
