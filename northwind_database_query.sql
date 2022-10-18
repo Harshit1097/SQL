@@ -1,3 +1,7 @@
+-- queries based on the Northwind database
+
+
+
 
 -- 1. Concat first and last names and display full name
 select firstname, lastname, concat(firstname, ' ', lastname) as FullName
