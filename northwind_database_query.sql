@@ -91,3 +91,30 @@ select a.EmployeeID, a.LastName, b.OrderID, d.ProductName, c.Quantity
 from Employees a, Orders b, OrderDetails c, Products d
 where a.EmployeeID = b.EmployeeID and c.ProductID = d.ProductID and b.OrderID = c.OrderID
 order by b.OrderID, d.ProductID;
+
+
+
+-- 11. Customers who have never placed any order
+
+select Customers.CustomerID, Orders.OrderID from  Customers
+left join Orders on Customers.CustomerID = Orders.CustomerID
+where Orders.OrderID is null;
+
+
+
+-- 12. Identify High value customers - who have made orders totaling $15,000 or above in the year 2016
+
+select a.CustomerID, a.CompanyName, sum(c.UnitPrice*c.Quantity) as total_price 
+from Customers a join Orders b on a.CustomerID = b.CustomerID join OrderDetails c on b.OrderID = c.OrderID
+where convert(date, b.OrderDate) like '2016%'
+group by a.CustomerID, a.CompanyName
+having sum(c.UnitPrice*c.Quantity) >= 15000
+order by total_price desc;
+
+
+
+-- 13. Orders made on the last day of months
+
+select OrderID, EmployeeID, OrderDate from Orders
+where convert(date, OrderDate) = eomonth(OrderDate)
+order by EmployeeID, OrderID;
