@@ -1,0 +1,22 @@
+--Pivot the Occupation column in OCCUPATIONS so that each Name is sorted alphabetically and displayed underneath its corresponding Occupation.
+--The output column headers should be Doctor, Professor, Singer, and Actor, respectively.
+
+--Note: Print NULL when there are no more names corresponding to an occupation.
+--Occupation will only contain one of the following values: Doctor, Professor, Singer or Actor.
+
+--Sample Output
+
+--Jenny    Ashley     Meera  Jane
+--Samantha Christeen  Priya  Julia
+--NULL     Ketty      NULL   Maria
+
+
+
+
+SELECT MAX(CASE WHEN t.Occupation='Doctor' THEN t.Name END),
+       MAX(CASE WHEN t.Occupation='Professor' THEN t.Name END),
+       MAX(CASE WHEN t.Occupation='Singer' THEN t.Name END),
+       MAX(CASE WHEN t.Occupation='Actor' THEN t.Name END)
+FROM
+(SELECT *, ROW_NUMBER() OVER(PARTITION BY Occupation ORDER BY Name) AS rank_ FROM Occupations) t
+GROUP BY t.rank_;
